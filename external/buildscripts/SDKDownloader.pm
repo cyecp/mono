@@ -15,7 +15,7 @@ use Getopt::Long;
 use lib File::Spec->rel2abs(dirname(__FILE__)).'/.';
 
 # Override this value to point to a local directory for local testing
-my $base_url = "https://rhodecode.unity3d.com/unity-extra/";
+my $base_url = "https://ono.unity3d.com/unity-extra/";
 my $base_url_mirror = "http://mercurial-mirror.hq.unity3d.com/unity-extra/";
 
 # SDKDownloader fetches the default branch of a remote repository located at $base_url/$repo_name.
@@ -176,17 +176,20 @@ sub UpdateSDKRepo
 
 	my $parent_rev = "parent";
 
-	# check if we're in a mercurial repo
-	if (system("hg parent --template \"{node}\"") == 0)
+	if (-d $repo_name)
 	{
-		$parent_rev = `hg parent --template "{node}"`;
+		my $cwd = getcwd;
+		chdir($repo_name);
+
+		# check if we're in a mercurial repo
+		if (system("hg parent --template \"{node}\"") == 0)
+		{
+			$parent_rev = `hg parent --template "{node}"`;
+		}
+		# else we'll just pull every time
+
+		chdir($cwd);
 	}
-	# check if we're in a git repo
-	elsif (system("git rev-parse HEAD") == 0)
-	{
-		$parent_rev = `git rev-parse HEAD`;
-	}
-	# else we'll just pull every time
 
 	my $old_rev = "";
 
